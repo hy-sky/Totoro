@@ -1,0 +1,16 @@
+{
+  "name": "totoro",
+  "version": "1.0.0",
+  "description": "Totoro - The magical forest spirit meme token",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve .",
+    "dev": "serve ."
+  },
+  "dependencies": {
+    "serve": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+} 

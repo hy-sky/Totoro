@@ -1,5 +1,98 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 页面加载完成后添加动画
+    // Audio setup with autoplay overlay workaround
+    const bgMusic = document.getElementById('bg-music');
+    const autoplayButton = document.getElementById('autoplay-button');
+    const autoplayOverlay = document.getElementById('autoplay-overlay');
+    
+    // Simple function to play audio
+    const playAudio = () => {
+        if (bgMusic) {
+            bgMusic.volume = 0.3;
+            bgMusic.play()
+                .then(() => {
+                    console.log('Audio playback started');
+                    // Remove the overlay after successful play
+                    if (autoplayOverlay) {
+                        autoplayOverlay.style.display = 'none';
+                    }
+                })
+                .catch(err => {
+                    console.error('Audio playback failed:', err);
+                });
+        }
+    };
+    
+    // Option 1: Use the autoplay button (almost invisible to user)
+    if (autoplayButton) {
+        autoplayButton.addEventListener('click', () => {
+            playAudio();
+            // Remove the overlay after click
+            if (autoplayOverlay) {
+                autoplayOverlay.style.display = 'none';
+            }
+        });
+        
+        // Auto-trigger the click in multiple ways
+        const triggerClick = () => {
+            try {
+                // Method 1: Direct click
+                autoplayButton.click();
+                
+                // Method 2: Programmatic event
+                const clickEvent = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                });
+                autoplayButton.dispatchEvent(clickEvent);
+                
+                // Method 3: Dispatch touch events for mobile
+                if ('ontouchstart' in window) {
+                    const touchStartEvent = new TouchEvent('touchstart');
+                    const touchEndEvent = new TouchEvent('touchend');
+                    autoplayButton.dispatchEvent(touchStartEvent);
+                    autoplayButton.dispatchEvent(touchEndEvent);
+                }
+            } catch (err) {
+                console.log('Auto-trigger failed:', err);
+            }
+        };
+        
+        // Try multiple times with increasing delays
+        setTimeout(triggerClick, 100);
+        setTimeout(triggerClick, 500);
+        setTimeout(triggerClick, 1000);
+        setTimeout(triggerClick, 2000);
+    }
+    
+    // Option 2: Capture any user interaction with the page
+    const userInteractionEvents = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+    
+    const handleUserInteraction = () => {
+        playAudio();
+        
+        // Remove event listeners after first interaction
+        userInteractionEvents.forEach(event => {
+            document.removeEventListener(event, handleUserInteraction);
+        });
+    };
+    
+    // Add interaction listeners
+    userInteractionEvents.forEach(event => {
+        document.addEventListener(event, handleUserInteraction);
+    });
+    
+    // Option 3: Re-play when the document becomes visible
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && bgMusic && !bgMusic.paused) {
+            bgMusic.currentTime = 0; // Restart the audio
+            bgMusic.play().catch(err => {
+                console.log('Visibility play failed:', err);
+            });
+        }
+    });
+    
+    // Page load animations
     const mainTitle = document.querySelector('header h1');
     mainTitle.style.opacity = '0';
     mainTitle.style.transform = 'translateY(-20px)';
@@ -10,20 +103,20 @@ document.addEventListener('DOMContentLoaded', () => {
         mainTitle.style.transform = 'translateY(0)';
     }, 300);
     
-    // 合约地址样式适配
+    // Contract address style adaptation
     const contractAddress = document.getElementById('contract-address');
     if (contractAddress) {
         const addressSpan = contractAddress.querySelector('.address-text');
         const caLabel = contractAddress.querySelector('.ca-label');
         
-        // 检测设备并适配样式的函数
+        // Function to detect device and adapt styles
         const adaptToScreenSize = () => {
             const isMobile = window.innerWidth <= 768;
             const isVerySmall = window.innerWidth <= 375;
             
             if (addressSpan) {
                 if (isMobile) {
-                    // 在小屏幕上，确保地址可见
+                    // For small screens, ensure address is visible
                     addressSpan.style.display = 'block';
                     addressSpan.style.wordBreak = 'break-all';
                     addressSpan.style.fontWeight = 'bold';
@@ -35,14 +128,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         caLabel.style.textAlign = 'center';
                     }
                     
-                    // 设置父容器也居中
+                    // Set the parent container to center as well
                     const tokenAddress = document.querySelector('.token-address');
                     if (tokenAddress) {
                         tokenAddress.style.textAlign = 'center';
                     }
                     
                     if (isVerySmall) {
-                        // 极小屏幕的特殊处理
+                        // Special handling for very small screens
                         addressSpan.style.fontSize = '0.75rem';
                         addressSpan.style.lineHeight = '1.4';
                         
@@ -51,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 } else {
-                    // 在大屏幕上恢复默认样式
+                    // For large screens, restore default styles
                     addressSpan.style.display = 'inline';
                     addressSpan.style.wordBreak = 'normal';
                     addressSpan.style.fontSize = '';
@@ -69,20 +162,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
         
-        // 初始调用
+        // Initial call
         adaptToScreenSize();
         
-        // 窗口大小变化时重新调整
+        // Readjust when window size changes
         window.addEventListener('resize', adaptToScreenSize);
     }
     
-    // 滚动相关元素
+    // Animation elements
     const galleryItems = document.querySelectorAll('.gallery-item');
     const infoSection = document.querySelector('.info');
     const features = document.querySelectorAll('.feature');
     const tokenSection = document.querySelector('.token-info');
     
-    // 检测元素是否在视窗内
+    // Check if element is in viewport
     function isInViewport(element, offset = 0) {
         const rect = element.getBoundingClientRect();
         return (
@@ -91,9 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
     
-    // 为进入视窗的元素添加可见类
+    // Add visible class to elements entering viewport
     function handleScrollAnimation() {
-        // 处理画廊项目
+        // Handle gallery items
         galleryItems.forEach((item, index) => {
             if (isInViewport(item, 50)) {
                 setTimeout(() => {
@@ -102,11 +195,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // 处理信息部分
+        // Handle info section
         if (isInViewport(infoSection, 100)) {
             infoSection.classList.add('visible');
             
-            // 处理特性部分
+            // Handle feature items
             setTimeout(() => {
                 features.forEach((feature, index) => {
                     setTimeout(() => {
@@ -116,21 +209,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 300);
         }
         
-        // 处理代币信息部分
+        // Handle token information section
         if (isInViewport(tokenSection, 100)) {
             tokenSection.classList.add('visible');
         }
     }
     
-    // 初始检查
+    // Initial check
     setTimeout(handleScrollAnimation, 300);
     
-    // 监听滚动事件
+    // Listen for scroll events
     window.addEventListener('scroll', () => {
         handleScrollAnimation();
     });
     
-    // 平滑滚动到锚点
+    // Smooth scrolling to anchors
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             e.preventDefault();
@@ -147,21 +240,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // 添加视差滚动效果
+    // Add parallax scrolling effects
     window.addEventListener('scroll', () => {
         const scrollPosition = window.scrollY;
         
-        // 为主要标题添加视差效果
+        // Add parallax effect to main title
         mainTitle.style.transform = `translateY(${scrollPosition * 0.05}px)`;
         
-        // 为龙猫图片添加视差效果
+        // Add parallax effect to Totoro image
         const totoroImage = document.querySelector('.main-totoro');
         if (totoroImage) {
             totoroImage.style.transform = `translateY(${scrollPosition * -0.03}px) translateY(${Math.sin(Date.now() / 1000) * 5}px)`;
         }
     });
     
-    // 添加元素进入动画
+    // Apply entrance animations
     const applyEntranceAnimation = (elements, delay = 0, stagger = 100) => {
         elements.forEach((element, index) => {
             element.style.opacity = '0';
@@ -175,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     
-    // 应用入场动画到社交链接
+    // Apply entrance animations to social links
     const socialLinks = document.querySelectorAll('.social-link');
     applyEntranceAnimation(socialLinks, 1000, 150);
 }); 

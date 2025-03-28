@@ -376,7 +376,7 @@ footer {
         max-width: 300px;
     }
     
-    /* 移动端CA地址显示优化 */
+    /* Mobile CA address display optimization */
     .token-address {
         font-size: 0.9rem;
         max-width: 100%;

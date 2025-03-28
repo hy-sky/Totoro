@@ -7,118 +7,352 @@
     <meta name="description" content="Totoro - The magical forest spirit meme token">
     <link rel="stylesheet" href="styles.css">
     <style>
-        #autoplay-overlay {
+        @keyframes gentlePulse {
+            0% { opacity: 0.9; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 0.9; transform: scale(1); }
+        }
+        
+        @keyframes starFloat {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        @keyframes magicFadeOut {
+            0% { clip-path: inset(0 0 0 0); opacity: 1; }
+            100% { clip-path: inset(0 0 0 100%); opacity: 0; }
+        }
+        
+        @keyframes textReveal {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .memory-prompt-container {
+            position: relative;
+            margin-top: 0px;
+            margin-bottom: 0px;
+            text-align: center;
+            width: 100%;
+            height: 60px; /* Fixed height to prevent layout shift */
+        }
+        
+        #memory-prompt {
+            display: inline-block;
+            background: rgba(25, 25, 30, 0.6);
+            color: #FFD700;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            backdrop-filter: blur(5px);
+            border: none;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: gentlePulse 3s infinite ease-in-out;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #memory-prompt:hover {
+            background: rgba(40, 40, 50, 0.8);
+            color: #FFFFFF;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+        }
+        
+        #memory-prompt.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.9);
+        }
+        
+        #memory-prompt::before {
+            content: '✨';
+            margin-right: 10px;
+            opacity: 0.8;
+        }
+        
+        #memory-prompt::after {
+            content: '✨';
+            margin-left: 10px;
+            opacity: 0.8;
+        }
+        
+        /* Star elements for the dissipation effect */
+        .star {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: #FFD700;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+            box-shadow: 0 0 5px #FFD700;
+            opacity: 0;
+        }
+        
+        .totoro-container {
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        .main-totoro {
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .totoro-container:hover .main-totoro {
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.7));
+            transform: scale(1.02);
+        }
+        
+        /* Text reveal animation for hero text */
+        .hero-text {
+            opacity: 1;
+            transform: translateY(0);
+            transition: transform 2.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        
+        .hero-text.move-up {
+            transform: translateY(-120px); /* Move up to where memory-prompt was, plus extra 25% */
+        }
+        
+        .hero-text h2,
+        .hero-text p {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.8s ease;
+        }
+        
+        /* Info section reveal animation */
+        .info {
             position: fixed;
-            top: 0;
+            bottom: -100%;
             left: 0;
             width: 100%;
             height: 100%;
-            background: transparent;
-            z-index: 9999;
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 3rem 1rem;
+            z-index: 100;
+            transition: bottom 10s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            overflow: hidden;
+        }
+        
+        .info.reveal {
+            bottom: 0;
+        }
+        
+        .info h2 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #FFA94D;
+            animation: scrollCredits 10s linear forwards;
+            opacity: 0;
+            position: relative;
+            transform: translateY(100vh);
+            text-shadow: 0 0 10px rgba(255, 169, 77, 0.5);
+        }
+        
+        .info > p {
+            margin-bottom: 3rem;
+            font-size: 1.3rem;
+            animation: scrollCredits 10s linear 0.5s forwards;
+            opacity: 0;
+            position: relative;
+            transform: translateY(120vh);
+        }
+        
+        .info-features {
             display: flex;
             justify-content: center;
-            align-items: center;
-            animation: fadeout 0.5s ease 1.5s forwards;
-            pointer-events: none;
-        }
-        
-        @keyframes fadeout {
-            to { opacity: 0; visibility: hidden; pointer-events: none; }
-        }
-        
-        #autoplay-button {
-            position: absolute;
-            opacity: 0;
+            flex-wrap: wrap;
+            gap: 2.5rem;
             width: 100%;
-            height: 100%;
-            cursor: default;
-            border: none;
-            background: transparent;
-            pointer-events: auto;
+            max-width: 900px;
+            animation: scrollCredits 10s linear 2s forwards;
+            opacity: 0;
+            position: relative;
+            transform: translateY(140vh);
+        }
+        
+        .feature {
+            background-color: rgba(255, 169, 77, 0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            width: 220px;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature h3 {
+            color: #FFA94D;
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+        
+        @keyframes scrollCredits {
+            0% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(-30vh);
+            }
+            100% {
+                transform: translateY(-100vh);
+                opacity: 0;
+            }
+        }
+        
+        /* Additional layout improvements */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        main {
+            overflow: hidden;
+        }
+        
+        .hero {
+            position: relative;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3rem;
+        }
+        
+        .gallery {
+            padding-top: 2rem;
+            padding-bottom: 4rem;
+        }
+        
+        @media (max-width: 768px) {
+            #memory-prompt {
+                top: 15px;
+                right: 15px;
+                font-size: 0.9rem;
+                padding: 10px 18px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #memory-prompt {
+                font-size: 0.8rem;
+                padding: 8px 15px;
+            }
+            
+            #memory-prompt::before,
+            #memory-prompt::after {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="autoplay-overlay">
-        <button id="autoplay-button">Enter Site</button>
-    </div>
-    
     <audio id="bg-music" loop>
         <source src="./public/music/Totoro_mp3.aac" type="audio/aac">
         <source src="./public/music/Totoro_mp3.mp3" type="audio/mpeg">
         <source src="./public/music/Totoro_mp3.ogg" type="audio/ogg">
     </audio>
 
-    <header>
-        <h1>TOTORO</h1>
-    </header>
-    
-    <main>
-        <section class="hero">
-            <div class="hero-content">
-                <div class="totoro-container">
-                    <div class="hero-image">
-                        <img src="./public/images/totoro-main.png" alt="Totoro" class="main-totoro" width="300">
+    <div class="container">
+        <header>
+            <h1>TOTORO</h1>
+        </header>
+        
+        <main>
+            <section class="hero">
+                <div class="hero-content">
+                    <div class="totoro-container" id="totoro-trigger">
+                        <div class="hero-image">
+                            <img src="./public/images/totoro-main.png" alt="Totoro" class="main-totoro" width="300">
+                        </div>
+                    </div>
+                    <div class="memory-prompt-container">
+                        <div id="memory-prompt">Click on Totoro to trigger memory</div>
+                    </div>
+                    <div class="hero-text">
+                        <h2>THE MAGICAL FOREST SPIRIT</h2>
+                        <p>Bringing the magic of the forest to the crypto world</p>
                     </div>
                 </div>
-                <div class="hero-text">
-                    <h2>THE MAGICAL FOREST SPIRIT</h2>
-                    <p>Bringing the magic of the forest to the crypto world</p>
+            </section>
+            
+            <section class="gallery">
+                <div class="gallery-item">
+                    <img src="./public/images/totoro-night.jpg" alt="Totoro at night with full moon">
                 </div>
-            </div>
-        </section>
-        
-        <section class="gallery">
-            <div class="gallery-item">
-                <img src="./public/images/totoro-night.jpg" alt="Totoro at night with full moon">
-            </div>
-            <div class="gallery-item">
-                <img src="./public/images/totoro-sunset.jpg" alt="Totoro at sunset with magical fruit">
-            </div>
-            <div class="gallery-item">
-                <img src="./public/images/totoro-temple.jpg" alt="Totoro at ancient temple">
-            </div>
-            <div class="gallery-item">
-                <img src="./public/images/totoro-forest.jpg" alt="Totoro in magical forest">
-            </div>
-        </section>
-        
-        <section class="info">
-            <h2>FOREST GUARDIAN</h2>
-            <p>A friendly spirit bringing joy, luck and prosperity</p>
-            <div class="info-features">
-                <div class="feature">
-                    <h3>MAGICAL</h3>
-                    <p>Enchanted forest powers</p>
+                <div class="gallery-item">
+                    <img src="./public/images/totoro-sunset.jpg" alt="Totoro at sunset with magical fruit">
                 </div>
-                <div class="feature">
-                    <h3>FRIENDLY</h3>
-                    <p>Welcomes all travelers</p>
+                <div class="gallery-item">
+                    <img src="./public/images/totoro-temple.jpg" alt="Totoro at ancient temple">
                 </div>
-                <div class="feature">
-                    <h3>GUARDIAN</h3>
-                    <p>Protects the natural world</p>
+                <div class="gallery-item">
+                    <img src="./public/images/totoro-forest.jpg" alt="Totoro in magical forest">
                 </div>
-            </div>
-        </section>
+            </section>
+            
+            <section class="info">
+                <h2>FOREST GUARDIAN</h2>
+                <p>A friendly spirit bringing joy, luck and prosperity</p>
+                <div class="info-features">
+                    <div class="feature">
+                        <h3>MAGICAL</h3>
+                        <p>Enchanted forest powers</p>
+                    </div>
+                    <div class="feature">
+                        <h3>FRIENDLY</h3>
+                        <p>Welcomes all travelers</p>
+                    </div>
+                    <div class="feature">
+                        <h3>GUARDIAN</h3>
+                        <p>Protects the natural world</p>
+                    </div>
+                </div>
+            </section>
 
-        <section class="token-info">
-            <div class="token-container">
-                <h2>IT'S TIME TO</h2>
-                <h2 class="token">$TOTORO</h2>
+            <section class="token-info">
+                <div class="token-container">
+                    <h2>IT'S TIME TO</h2>
+                    <h2 class="token">$TOTORO</h2>
+                </div>
+                <div class="token-address">
+                    <p id="contract-address"><span class="ca-label">ca:</span><span class="address-text">0x736f40ab52405353e29cef4b87dc42f707fab9e6</span></p>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <div class="social-links">
+                <a href="https://t.me/Ghibli_Mascot" class="social-link" target="_blank" rel="noopener noreferrer">Telegram</a>
+                <a href="https://x.com/Ghibli_Mascot" class="social-link" target="_blank" rel="noopener noreferrer">Twitter</a>
             </div>
-            <div class="token-address">
-                <p id="contract-address"><span class="ca-label">ca:</span><span class="address-text">0x736f40ab52405353e29cef4b87dc42f707fab9e6</span></p>
-            </div>
-        </section>
-    </main>
-    
-    <footer>
-        <div class="social-links">
-            <a href="https://t.me/Ghibli_Mascot" class="social-link" target="_blank" rel="noopener noreferrer">telegram</a>
-            <a href="https://x.com/Ghibli_Mascot" class="social-link" target="_blank" rel="noopener noreferrer">twitter</a>
-        </div>
-    </footer>
+        </footer>
+    </div>
 
     <script src="script.js"></script>
 </body>

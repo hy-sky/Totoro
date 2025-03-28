@@ -1,96 +1,228 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Audio setup with autoplay overlay workaround
+    // Audio setup with memory prompt
     const bgMusic = document.getElementById('bg-music');
-    const autoplayButton = document.getElementById('autoplay-button');
-    const autoplayOverlay = document.getElementById('autoplay-overlay');
+    const memoryPrompt = document.getElementById('memory-prompt');
+    const totoroTrigger = document.getElementById('totoro-trigger');
+    const heroText = document.querySelector('.hero-text');
+    const infoSection = document.querySelector('.info');
     
-    // Simple function to play audio
-    const playAudio = () => {
-        if (bgMusic) {
-            bgMusic.volume = 0.3;
-            bgMusic.play()
-                .then(() => {
-                    console.log('Audio playback started');
-                    // Remove the overlay after successful play
-                    if (autoplayOverlay) {
-                        autoplayOverlay.style.display = 'none';
-                    }
-                })
-                .catch(err => {
-                    console.error('Audio playback failed:', err);
-                });
-        }
-    };
+    // Hero text is now visible by default, no need to hide it
     
-    // Option 1: Use the autoplay button (almost invisible to user)
-    if (autoplayButton) {
-        autoplayButton.addEventListener('click', () => {
-            playAudio();
-            // Remove the overlay after click
-            if (autoplayOverlay) {
-                autoplayOverlay.style.display = 'none';
-            }
-        });
-        
-        // Auto-trigger the click in multiple ways
-        const triggerClick = () => {
-            try {
-                // Method 1: Direct click
-                autoplayButton.click();
-                
-                // Method 2: Programmatic event
-                const clickEvent = new MouseEvent('click', {
-                    view: window,
-                    bubbles: true,
-                    cancelable: true
-                });
-                autoplayButton.dispatchEvent(clickEvent);
-                
-                // Method 3: Dispatch touch events for mobile
-                if ('ontouchstart' in window) {
-                    const touchStartEvent = new TouchEvent('touchstart');
-                    const touchEndEvent = new TouchEvent('touchend');
-                    autoplayButton.dispatchEvent(touchStartEvent);
-                    autoplayButton.dispatchEvent(touchEndEvent);
-                }
-            } catch (err) {
-                console.log('Auto-trigger failed:', err);
-            }
-        };
-        
-        // Try multiple times with increasing delays
-        setTimeout(triggerClick, 100);
-        setTimeout(triggerClick, 500);
-        setTimeout(triggerClick, 1000);
-        setTimeout(triggerClick, 2000);
+    // Hide info section initially - keeping any CSS transitions intact
+    if (infoSection) {
+        // We don't need to set inline styles as we're using CSS for transitions
+        // Just make sure it doesn't have the reveal class
+        infoSection.classList.remove('reveal');
     }
     
-    // Option 2: Capture any user interaction with the page
-    const userInteractionEvents = ['mousedown', 'keydown', 'touchstart', 'scroll'];
-    
-    const handleUserInteraction = () => {
-        playAudio();
+    // Create stars for memory effect
+    const createStars = (element, count = 30) => {
+        // Get the position and dimensions of the element
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
         
-        // Remove event listeners after first interaction
-        userInteractionEvents.forEach(event => {
-            document.removeEventListener(event, handleUserInteraction);
+        // Create stars
+        const stars = [];
+        for (let i = 0; i < count; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            
+            // Random position within the element
+            const angle = Math.random() * Math.PI * 2; // random angle
+            const distance = Math.random() * rect.width * 0.5; // random distance from center
+            const startX = centerX + Math.cos(angle) * distance;
+            const startY = centerY + Math.sin(angle) * distance;
+            
+            star.style.left = `${startX}px`;
+            star.style.top = `${startY}px`;
+            
+            // Random size and delay for more natural effect
+            const size = Math.random() * 5 + 2;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.opacity = '0';
+            
+            document.body.appendChild(star);
+            stars.push(star);
+        }
+        
+        return stars;
+    };
+    
+    // Animate stars floating upward
+    const animateStars = (stars) => {
+        stars.forEach((star, index) => {
+            // Random animation duration and delay
+            const duration = Math.random() * 1500 + 1500;
+            const delay = Math.random() * 500;
+            
+            // Create random end position (float upward direction)
+            const endAngle = Math.random() * Math.PI; // semi-circle upward
+            const distance = 100 + Math.random() * 150;
+            const translateX = Math.cos(endAngle) * distance;
+            const translateY = -Math.abs(Math.sin(endAngle) * distance); // always upward
+            
+            // Create animation
+            star.animate([
+                { transform: 'translate(0, 0) rotate(0deg)', opacity: 0 },
+                { opacity: 1, offset: 0.1 },
+                { opacity: 0.8, offset: 0.4 },
+                { transform: `translate(${translateX}px, ${translateY}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+            ], {
+                duration: duration,
+                delay: delay,
+                easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+                fill: 'forwards'
+            }).onfinish = () => {
+                // Remove the star from DOM after animation
+                star.remove();
+            };
         });
     };
     
-    // Add interaction listeners
-    userInteractionEvents.forEach(event => {
-        document.addEventListener(event, handleUserInteraction);
-    });
-    
-    // Option 3: Re-play when the document becomes visible
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && bgMusic && !bgMusic.paused) {
-            bgMusic.currentTime = 0; // Restart the audio
-            bgMusic.play().catch(err => {
-                console.log('Visibility play failed:', err);
-            });
+    // Create magic particles for dissolve effect
+    const createMagicParticles = (element, count = 40) => {
+        const rect = element.getBoundingClientRect();
+        const particles = [];
+        
+        for (let i = 0; i < count; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('star'); // Reuse star class for styling
+            
+            // Position particles along the text - from right to left
+            const posX = rect.left + rect.width - (rect.width * (i / count));
+            const posY = rect.top + (Math.random() * rect.height);
+            
+            particle.style.left = `${posX}px`;
+            particle.style.top = `${posY}px`;
+            
+            // Varied sizes for particles
+            const size = 2 + Math.random() * 3;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            document.body.appendChild(particle);
+            particles.push(particle);
         }
-    });
+        
+        return particles;
+    };
+    
+    // Animate magic particles
+    const animateMagicParticles = (particles) => {
+        particles.forEach((particle, index) => {
+            // Sequential delay from right to left
+            const delay = (particles.length - index) * 10;
+            const duration = 800 + Math.random() * 400;
+            
+            particle.animate([
+                { opacity: 0 },
+                { opacity: 1, offset: 0.1 },
+                { opacity: 1, transform: 'translateY(0px)', offset: 0.2 },
+                { opacity: 0, transform: `translateY(-${20 + Math.random() * 30}px)` }
+            ], {
+                duration: duration,
+                delay: delay,
+                easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+                fill: 'forwards'
+            }).onfinish = () => {
+                particle.remove();
+            };
+        });
+    };
+    
+    // Enhanced function to play audio with magical effects
+    const playAudio = (clickElement = null) => {
+        if (bgMusic && memoryPrompt && !memoryPrompt.classList.contains('playing')) {
+            // Add playing class to prevent multiple clicks
+            memoryPrompt.classList.add('playing');
+            
+            // Determine which element was clicked for star origin
+            const targetElement = clickElement || memoryPrompt;
+            
+            // Create and animate stars from the clicked element
+            const stars = createStars(targetElement);
+            animateStars(stars);
+            
+            // Create magic particles for dissolve effect
+            const particles = createMagicParticles(memoryPrompt);
+            
+            // Animate the prompt with magical right-to-left dissolve
+            const magicFade = memoryPrompt.animate([
+                { clipPath: 'inset(0 0 0 0)', opacity: 1 },
+                { clipPath: 'inset(0 0 0 100%)', opacity: 0 }
+            ], { 
+                duration: 1500, 
+                easing: 'cubic-bezier(0.42, 0, 0.58, 1)',
+                fill: 'forwards'
+            });
+            
+            // Trigger the particle animation once the main fade begins
+            setTimeout(() => {
+                animateMagicParticles(particles);
+            }, 200);
+            
+            // Set a slight delay for the audio to match the animation
+            setTimeout(() => {
+                bgMusic.volume = 0.3;
+                bgMusic.play()
+                    .then(() => {
+                        console.log('Audio playback started');
+                        // Hide the prompt after successful play
+                        memoryPrompt.classList.add('hidden');
+                        
+                        // Move hero text up to where the prompt was
+                        if (heroText) {
+                            // Wait a little for the prompt to disappear
+                            setTimeout(() => {
+                                heroText.classList.add('move-up');
+                            }, 200);
+                        }
+                        
+                        // After hero text is moved, show credits
+                        setTimeout(() => {
+                            if (infoSection) {
+                                // Add reveal class to trigger credits animation
+                                infoSection.classList.add('reveal');
+                                
+                                // After credits complete, remove info section
+                                setTimeout(() => {
+                                    infoSection.classList.remove('reveal');
+                                }, 10000); // Match duration with CSS animation (10s)
+                            }
+                        }, 2500); // Wait for hero text animation to finish
+                    })
+                    .catch(err => {
+                        console.error('Audio playback failed:', err);
+                        memoryPrompt.classList.remove('playing');
+                    });
+            }, 300);
+        }
+    };
+    
+    // Listen for clicks on the memory prompt
+    if (memoryPrompt) {
+        memoryPrompt.addEventListener('click', () => {
+            playAudio(memoryPrompt);
+        });
+        
+        // Add hover animation
+        memoryPrompt.addEventListener('mouseenter', () => {
+            memoryPrompt.style.animationPlayState = 'paused';
+        });
+        
+        memoryPrompt.addEventListener('mouseleave', () => {
+            memoryPrompt.style.animationPlayState = 'running';
+        });
+    }
+    
+    // Listen for clicks on Totoro
+    if (totoroTrigger) {
+        totoroTrigger.addEventListener('click', () => {
+            playAudio(totoroTrigger);
+        });
+    }
     
     // Page load animations
     const mainTitle = document.querySelector('header h1');
@@ -171,7 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Animation elements
     const galleryItems = document.querySelectorAll('.gallery-item');
-    const infoSection = document.querySelector('.info');
     const features = document.querySelectorAll('.feature');
     const tokenSection = document.querySelector('.token-info');
     
@@ -195,19 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Handle info section
-        if (isInViewport(infoSection, 100)) {
-            infoSection.classList.add('visible');
-            
-            // Handle feature items
-            setTimeout(() => {
-                features.forEach((feature, index) => {
-                    setTimeout(() => {
-                        feature.classList.add('visible');
-                    }, index * 150);
-                });
-            }, 300);
-        }
+        // Info section is now handled by credits animation, not scroll
         
         // Handle token information section
         if (isInViewport(tokenSection, 100)) {

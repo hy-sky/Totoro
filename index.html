@@ -303,6 +303,18 @@
             .hero-text p {
                 font-size: 1rem;
             }
+
+            .hero {
+                min-height: 60vh; /* 减小hero区域的最小高度 */
+            }
+
+            .hero-text.move-up {
+                transform: translateY(-80px); /* 减小上移距离 */
+            }
+
+            .gallery {
+                padding-top: 1rem; /* 减小与上方的间距 */
+            }
         }
         
         @media (max-width: 480px) {
@@ -337,6 +349,18 @@
                 font-size: 1.3rem;
                 margin-bottom: 0.4rem;
             }
+
+            .hero {
+                min-height: 50vh; /* 进一步减小hero区域的最小高度 */
+            }
+
+            .hero-text.move-up {
+                transform: translateY(-60px); /* 进一步减小上移距离 */
+            }
+
+            .gallery {
+                padding-top: 0.5rem; /* 进一步减小与上方的间距 */
+            }
         }
         
         @media (max-width: 360px) {
@@ -361,6 +385,18 @@
             .hero-text h2 {
                 font-size: 1.2rem;
                 margin-bottom: 0.3rem;
+            }
+
+            .hero {
+                min-height: 45vh; /* 最小屏幕下的hero区域最小高度 */
+            }
+
+            .hero-text.move-up {
+                transform: translateY(-50px); /* 最小屏幕下的上移距离 */
+            }
+
+            .gallery {
+                padding-top: 0.25rem; /* 最小屏幕下与上方的间距 */
             }
         }
     </style>

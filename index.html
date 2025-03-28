@@ -40,29 +40,35 @@
         
         #memory-prompt {
             display: inline-block;
-            background: rgba(25, 25, 30, 0.6);
+            background: rgba(25, 25, 30, 0.75);
             color: #FFD700;
-            padding: 12px 28px;
+            padding: 15px 30px;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             text-align: center;
             cursor: pointer;
             font-weight: 600;
-            letter-spacing: 1.2px;
+            letter-spacing: 1.5px;
             backdrop-filter: blur(5px);
-            border: none;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+            border: 2px solid rgba(255,215,0,0.5);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.3), inset 0 0 15px rgba(255, 215, 0, 0.1);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             animation: gentlePulse 3s infinite ease-in-out;
             margin: 0 auto;
             position: relative;
             overflow: hidden;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         #memory-prompt:hover {
-            background: rgba(40, 40, 50, 0.8);
+            background: rgba(40, 40, 50, 0.85);
             color: #FFFFFF;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+            border-color: rgba(255,255,255,0.6);
+            box-shadow: 0 0 35px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.2);
+            transform: scale(1.03);
         }
         
         #memory-prompt.hidden {
@@ -71,16 +77,21 @@
             transform: scale(0.9);
         }
         
-        #memory-prompt::before {
+        #memory-prompt::before,
+        #memory-prompt::after {
             content: '✨';
+            opacity: 0.9;
+            font-size: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        #memory-prompt::before {
             margin-right: 10px;
-            opacity: 0.8;
         }
         
         #memory-prompt::after {
-            content: '✨';
             margin-left: 10px;
-            opacity: 0.8;
         }
         
         /* Star elements for the dissipation effect */
@@ -252,10 +263,11 @@
         @media (max-width: 768px) {
             #memory-prompt {
                 font-size: 0.9rem;
-                padding: 10px 18px;
+                padding: 12px 20px;
                 width: auto;
-                display: inline-block;
                 margin: 0 auto;
+                border-width: 2px;
+                line-height: 1;
             }
             
             .memory-prompt-container {
@@ -264,18 +276,36 @@
                 display: flex;
                 justify-content: center;
             }
+            
+            #memory-prompt::before,
+            #memory-prompt::after {
+                font-size: 0.9rem;
+                margin: 0 5px;
+            }
         }
         
         @media (max-width: 480px) {
             #memory-prompt {
-                font-size: 0.8rem;
-                padding: 8px 15px;
+                font-size: 0.75rem;
+                padding: 10px 16px;
                 width: auto;
+                border-width: 1.5px;
+                white-space: nowrap;
+                line-height: 1;
             }
             
             #memory-prompt::before,
             #memory-prompt::after {
-                display: none;
+                font-size: 0.75rem;
+                margin: 0 3px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            #memory-prompt {
+                font-size: 0.7rem;
+                padding: 8px 14px;
+                line-height: 1;
             }
         }
     </style>
